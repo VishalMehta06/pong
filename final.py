@@ -8,7 +8,7 @@ WIDTH, HEIGHT = 700, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pong")
 
-FPS = 100
+FPS = 125
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -127,6 +127,7 @@ def handle_collision(ball, left_paddle, right_paddle):
 
 def handle_paddle_movement(keys, left_paddle, is_idle):
 	if keys[pygame.K_q]:
+		pygame.quit()
 		os._exit(0)
 	if keys[pygame.K_w] and left_paddle.y - left_paddle.VEL >= 0 and not is_idle:
 		left_paddle.move(up=True)
@@ -204,8 +205,7 @@ def one_player():
 			right_paddle.reset()
 			left_score = 0
 			right_score = 0
-
-	pygame.quit()
+			break
 
 def idle():
 	run = True
@@ -217,9 +217,12 @@ def idle():
 						  2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
 	ball = Ball(WIDTH // 2, HEIGHT // 2, BALL_RADIUS)
 
+	left_score = 0
+	right_score = 0
+
 	while run:
 		clock.tick(FPS)
-		draw(WIN, [left_paddle, right_paddle], ball, 0, 0, True)
+		draw(WIN, [left_paddle, right_paddle], ball, left_score, right_score, True)
 
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
@@ -227,8 +230,8 @@ def idle():
 				break
 
 		keys = pygame.key.get_pressed()
-		computer_movement(left_paddle, ball, 2)
-		computer_movement(right_paddle, ball, 2)
+		computer_movement(left_paddle, ball, 30)
+		computer_movement(right_paddle, ball, 3)
 		handle_paddle_movement(keys, left_paddle, True)
 		if keys[pygame.K_SPACE]:
 			break
@@ -236,7 +239,14 @@ def idle():
 		ball.move()
 		handle_collision(ball, left_paddle, right_paddle)
 
+		if ball.x < 0:
+			right_score += 1
+			ball.reset()
+		elif ball.x > WIDTH:
+			left_score += 1
+			ball.reset()
 
 
-idle()
-one_player()
+while True:
+	idle()
+	one_player()
